@@ -62,25 +62,60 @@ function App() {
   };
 
   const addStock = async (stockFromSearch) => {
-    const targetStock =
-      stockFromSearch ||
-      searchResult[0] || {
-        name: keyword,
-        code: Date.now().toString(),
-        market: "미정",
-      };
+  const targetStock =
+    stockFromSearch ||
+    searchResult[0] || {
+      name: keyword,
+      code: Date.now().toString(),
+      market: "미정",
+    };
 
-    if (!targetStock.name.trim()) return;
+  if (!targetStock.name.trim()) return;
 
-    const alreadyExists = stocks.some(
-      (stock) => stock.code === targetStock.code
-    );
+  const alreadyExists = stocks.some(
+    (stock) => stock.code === targetStock.code
+  );
 
-    if (alreadyExists) {
-      setKeyword("");
-      setSearchResult([]);
-      return;
-    }
+  if (alreadyExists) {
+    setKeyword("");
+    setSearchResult([]);
+    return;
+  }
+
+  const response = await fetch(
+    `/api/stock-price?code=${targetStock.code}`
+  );
+
+  const stockData = await response.json();
+
+  const newStock = {
+    name: targetStock.name,
+    code: targetStock.code,
+    market: targetStock.market || "미정",
+
+    price: stockData.price || 0,
+    change: stockData.change || 0,
+    volume: stockData.volume || 0,
+
+    theme: "미정",
+    rsi: 0,
+    macd: "없음",
+    volumeRate: 0,
+    signal: "분석 전",
+  };
+
+  const docRef = await addDoc(collection(db, "stocks"), newStock);
+
+  const savedStock = {
+    ...newStock,
+    id: docRef.id,
+  };
+
+  setStocks((prev) => [...prev, savedStock]);
+  setSelectedStock(savedStock);
+  setKeyword("");
+  setSearchResult([]);
+};
 
     const newStock = {
       name: targetStock.name,
