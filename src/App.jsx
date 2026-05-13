@@ -10,32 +10,9 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 function App() {
-  const [stocks, setStocks] = useState([
-    {
-      name: "두산로보틱스",
-      code: "454910",
-      price: 88000,
-      change: 2.3,
-      theme: "로봇",
-      rsi: 58,
-      macd: "상승전환",
-      volumeRate: 180,
-      signal: "20일선 눌림",
-    },
-    {
-      name: "LS ELECTRIC",
-      code: "010120",
-      price: 175000,
-      change: -1.1,
-      theme: "전력",
-      rsi: 49,
-      macd: "중립",
-      volumeRate: 95,
-      signal: "관망",
-    },
-  ]);
+  const [stocks, setStocks] = useState([]);
 
-  const [selectedStock, setSelectedStock] = useState(stocks[0]);
+  const [selectedStock, setSelectedStock] = useState(null);
   const [keyword, setKeyword] = useState("");
 
   const [allStocks, setAllStocks] = useState([]);
