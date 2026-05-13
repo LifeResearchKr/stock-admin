@@ -1,0 +1,38 @@
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const stocks = [
+  { name: "삼성전자", code: "005930", market: "KOSPI" },
+  { name: "SK하이닉스", code: "000660", market: "KOSPI" },
+  { name: "LG에너지솔루션", code: "373220", market: "KOSPI" },
+  { name: "현대차", code: "005380", market: "KOSPI" },
+  { name: "기아", code: "000270", market: "KOSPI" },
+  { name: "NAVER", code: "035420", market: "KOSPI" },
+  { name: "카카오", code: "035720", market: "KOSPI" },
+  { name: "두산로보틱스", code: "454910", market: "KOSPI" },
+  { name: "LS ELECTRIC", code: "010120", market: "KOSPI" },
+  { name: "대한전선", code: "001440", market: "KOSPI" },
+  { name: "에코프로비엠", code: "247540", market: "KOSDAQ" },
+  { name: "에코프로", code: "086520", market: "KOSDAQ" },
+  { name: "레인보우로보틱스", code: "277810", market: "KOSDAQ" },
+  { name: "로보스타", code: "090360", market: "KOSDAQ" },
+  { name: "클로봇", code: "466100", market: "KOSDAQ" },
+];
+
+const outputPath = path.join(
+  __dirname,
+  "../public/stocks.json"
+);
+
+fs.writeFileSync(
+  outputPath,
+  JSON.stringify(stocks, null, 2),
+  "utf-8"
+);
+
+console.log("stocks.json 생성 완료");
+console.log(`총 ${stocks.length}개 종목 저장`);
