@@ -11,19 +11,15 @@ import "./App.css";
 
 function App() {
   const [stocks, setStocks] = useState([]);
-
   const [selectedStock, setSelectedStock] = useState(null);
   const [keyword, setKeyword] = useState("");
-
   const [allStocks, setAllStocks] = useState([]);
   const [searchResult, setSearchResult] = useState([]);
 
   useEffect(() => {
     fetch("/stocks.json")
       .then((res) => res.json())
-      .then((data) => {
-        setAllStocks(data);
-      });
+      .then((data) => setAllStocks(data));
   }, []);
 
   useEffect(() => {
@@ -35,8 +31,9 @@ function App() {
         ...docItem.data(),
       }));
 
+      setStocks(firebaseStocks);
+
       if (firebaseStocks.length > 0) {
-        setStocks(firebaseStocks);
         setSelectedStock(firebaseStocks[0]);
       }
     };
@@ -62,67 +59,39 @@ function App() {
   };
 
   const addStock = async (stockFromSearch) => {
-  const targetStock =
-    stockFromSearch ||
-    searchResult[0] || {
-      name: keyword,
-      code: Date.now().toString(),
-      market: "미정",
-    };
+    const targetStock =
+      stockFromSearch ||
+      searchResult[0] || {
+        name: keyword,
+        code: Date.now().toString(),
+        market: "미정",
+      };
 
-  if (!targetStock.name.trim()) return;
+    if (!targetStock.name.trim()) return;
 
-  const alreadyExists = stocks.some(
-    (stock) => stock.code === targetStock.code
-  );
+    const alreadyExists = stocks.some(
+      (stock) => stock.code === targetStock.code
+    );
 
-  if (alreadyExists) {
-    setKeyword("");
-    setSearchResult([]);
-    return;
-  }
+    if (alreadyExists) {
+      setKeyword("");
+      setSearchResult([]);
+      return;
+    }
 
-  const response = await fetch(
-    `/api/stock-price?code=${targetStock.code}`
-  );
+    const response = await fetch(
+      `/api/stock-price?code=${targetStock.code}`
+    );
 
-  const stockData = await response.json();
-
-  const newStock = {
-    name: targetStock.name,
-    code: targetStock.code,
-    market: targetStock.market || "미정",
-
-    price: stockData.price || 0,
-    change: stockData.change || 0,
-    volume: stockData.volume || 0,
-
-    theme: "미정",
-    rsi: 0,
-    macd: "없음",
-    volumeRate: 0,
-    signal: "분석 전",
-  };
-
-  const docRef = await addDoc(collection(db, "stocks"), newStock);
-
-  const savedStock = {
-    ...newStock,
-    id: docRef.id,
-  };
-
-  setStocks((prev) => [...prev, savedStock]);
-  setSelectedStock(savedStock);
-  setKeyword("");
-  setSearchResult([]);
-};
+    const stockData = await response.json();
 
     const newStock = {
       name: targetStock.name,
       code: targetStock.code,
       market: targetStock.market || "미정",
-      price: 0,
-      change: 0,
+      price: stockData.price || 0,
+      change: stockData.change || 0,
+      volume: stockData.volume || 0,
       theme: "미정",
       rsi: 0,
       macd: "없음",
@@ -177,9 +146,7 @@ function App() {
           onChange={(e) => searchStock(e.target.value)}
         />
 
-        <button onClick={() => addStock()}>
-          추가
-        </button>
+        <button onClick={() => addStock()}>추가</button>
 
         {searchResult.length > 0 && (
           <div className="search-result">
@@ -234,18 +201,11 @@ function App() {
           {selectedStock && (
             <>
               <h2>{selectedStock.name}</h2>
-
               <p>종목코드: {selectedStock.code}</p>
 
-              <h1>
-                {selectedStock.price.toLocaleString()}원
-              </h1>
+              <h1>{selectedStock.price.toLocaleString()}원</h1>
 
-              <p
-                className={
-                  selectedStock.change >= 0 ? "up" : "down"
-                }
-              >
+              <p className={selectedStock.change >= 0 ? "up" : "down"}>
                 {selectedStock.change > 0 ? "+" : ""}
                 {selectedStock.change}%
               </p>
@@ -272,7 +232,7 @@ function App() {
 
                 <div className="indicator-row">
                   <span>거래량</span>
-                  <strong>{selectedStock.volumeRate}%</strong>
+                  <strong>{selectedStock.volume || 0}</strong>
                 </div>
 
                 <div className="signal">
@@ -286,6 +246,6 @@ function App() {
       </div>
     </div>
   );
-
+}
 
 export default App;
