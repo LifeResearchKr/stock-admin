@@ -22,6 +22,49 @@ function App() {
       .then((data) => setAllStocks(data));
   }, []);
 
+useEffect(() => {
+  if (stocks.length === 0) return;
+
+  const refreshPrices = async () => {
+    try {
+      const updatedStocks = await Promise.all(
+        stocks.map(async (stock) => {
+          const response = await fetch(
+            `/api/stock-price?code=${stock.code}&t=${Date.now()}`
+          );
+
+          const stockData = await response.json();
+
+          return {
+            ...stock,
+            price: stockData.price || stock.price || 0,
+            change: stockData.change || stock.change || 0,
+            volume: stockData.volume || stock.volume || 0,
+          };
+        })
+      );
+
+      setStocks(updatedStocks);
+
+      setSelectedStock((prev) => {
+        if (!prev) return null;
+
+        const updatedSelected = updatedStocks.find(
+          (stock) => stock.code === prev.code
+        );
+
+        return updatedSelected || prev;
+      });
+    } catch (error) {
+      console.error("현재가 자동 갱신 실패:", error);
+    }
+  };
+
+  const timer = setInterval(refreshPrices, 2000);
+
+  return () => clearInterval(timer);
+}, [stocks.length]);
+  
   useEffect(() => {
     const loadStocks = async () => {
       const querySnapshot = await getDocs(collection(db, "stocks"));
